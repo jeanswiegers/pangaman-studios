@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CoreCLR Ready · Pangaman Studios</title>
+<meta name="description" content="CoreCLR Ready finds Unity C# code that breaks with Domain Reload off and on CoreCLR, and previews the fix.">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self'; style-src 'self'; script-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site"><div class="wrap">
+<a class="brand" href="index.html"><img src="assets/img/mark.svg" alt="" width="36" height="36">Pangaman Studios</a>
+<nav class="main" aria-label="Main"><ul><li><a href="index.html">Home</a></li><li><a href="coreclr-ready.html" aria-current="page">CoreCLR Ready</a></li><li><a href="docs.html">Documentation</a></li><li><a href="changelog.html">Changelog</a></li><li><a href="support.html">Support</a></li></ul></nav>
+</div></header>
+<main id="main"><div class="wrap">
+
+<section class="hero">
+<div>
+<h1>CoreCLR Ready</h1>
+<p class="lead">Find the code that breaks with Domain Reload off and on CoreCLR, and see the fix before anything changes.</p>
+<p>Unity is moving from Mono to the CoreCLR runtime, and turning off Domain Reload in Enter Play Mode Options
+makes entering Play mode faster (from Unity 6.8 it is the only option). Both changes break code that used to work: static fields
+keep their values between Play sessions, <code>AppDomain</code> APIs stop behaving the same, <code>BinaryFormatter</code>
+goes away. CoreCLR Ready scans your project's C# for these patterns, explains each one, links to Unity's
+documentation and, where a safe mechanical change exists, shows the exact edit as a diff.</p>
+<div class="btns"><a class="btn" href="ASSET_STORE_LITE_URL">Get Lite (free)</a><a class="btn" href="ASSET_STORE_PRO_URL">Get Pro</a><a class="btn ghost" href="docs.html">Read the manual</a></div>
+</div>
+<div><figure><a href="assets/img/01-findings-list-dark.png"><img src="assets/img/crop-list.png" alt="Findings list grouped by file after a scan of a demo project, with warning and error icons and [fix] tags." width="760" height="560"></a><figcaption>Findings grouped by file after a scan. <code>[fix]</code> marks findings with an automatic fix.</figcaption></figure></div>
+</section>
+
+<h2>Lite and Pro</h2>
+<div class="cards">
+<div class="card lite">
+<h3>Lite (free)</h3>
+<ul>
+<li>Scans <code>Assets/</code> and embedded or local packages with the same defines and references Unity uses.</li>
+<li>Eleven rules (CCR001–CCR011) with explanations and links to Unity's documentation.</li>
+<li>Diff preview of every automatic fix.</li>
+<li>JSON and Markdown reports; batchmode command with a CI exit code.</li>
+<li>Read-only: Lite never changes your files.</li>
+</ul>
+<a class="btn" href="ASSET_STORE_LITE_URL">Asset Store: Lite</a>
+</div>
+<div class="card pro">
+<h3>Pro</h3>
+<ul>
+<li>Everything in Lite.</li>
+<li>Apply one fix or all fixes after reviewing the preview.</li>
+<li>Automatic backup of every changed file, and one-click <strong>Revert last</strong> that refuses to overwrite later edits.</li>
+<li>Command-line apply and revert for CI.</li>
+<li>Scan of precompiled managed DLLs (detect-only).</li>
+</ul>
+<a class="btn" href="ASSET_STORE_PRO_URL">Asset Store: Pro</a>
+</div>
+</div>
+
+<h2>What it checks</h2>
+<p>Mutable static state that survives Play mode with Domain Reload off (fields, events, auto-properties,
+singletons), <code>AppDomain.GetAssemblies</code> and <code>DomainUnload</code>, <code>BinaryFormatter</code>,
+<code>Assembly.Location</code>, pointer-to-int conversions, <code>string.GetHashCode</code> used as a stable value,
+non-default encodings, <code>Assembly.LoadFile</code>/<code>LoadFrom</code>, <code>ManagedDebugger</code> and
+<code>[DllImport]</code> into Mono runtime libraries. The <a href="docs.html#4-rules">rules table</a> in the manual
+lists which ones have an automatic fix.</p>
+<p>The analysis is static: it can't know whether a static value is meant to persist. Those cases are reported, not
+fixed, and you can silence one with a comment.</p>
+
+<h2>Screenshots</h2>
+<div class="shots">
+<figure><a href="assets/img/02-ccr001-diff-preview-dark.png"><img src="assets/img/02-ccr001-diff-preview-dark-800.png" alt="A static singleton finding with the diff preview of a generated reset method and the Apply this fix button." width="800" height="480" loading="lazy"></a><figcaption>Pro: a static singleton finding and the generated reset method, ready to apply.</figcaption></figure>
+<figure><a href="assets/img/03-ccr004-manual-change-dark.png"><img src="assets/img/03-ccr004-manual-change-dark-800.png" alt="A BinaryFormatter error with the recommendation and a note that a manual change is needed." width="800" height="480" loading="lazy"></a><figcaption>Some problems need a person: BinaryFormatter is reported with the reason and no automatic fix.</figcaption></figure>
+<figure><a href="assets/img/04-pro-after-apply-dark.png"><img src="assets/img/04-pro-after-apply-dark-800.png" alt="The window after applying a fix: the status line names the backup folder and Revert last is enabled." width="800" height="480" loading="lazy"></a><figcaption>Pro after applying a fix: the backup location is shown and Revert last is available.</figcaption></figure>
+<figure><a href="assets/img/05-pro-after-revert-dark.png"><img src="assets/img/05-pro-after-revert-dark-800.png" alt="The window after Revert last: the status line reports the reverted fix and the findings are back." width="800" height="480" loading="lazy"></a><figcaption>Pro after Revert last.</figcaption></figure>
+<figure><a href="assets/img/06-lite-diff-preview-dark.png"><img src="assets/img/06-lite-diff-preview-dark-800.png" alt="Lite showing the same diff preview with a note that Lite does not apply changes." width="800" height="480" loading="lazy"></a><figcaption>Lite shows the same preview; you apply the change yourself.</figcaption></figure>
+<figure><a href="assets/img/07-ccr001-diff-preview-light.png"><img src="assets/img/07-ccr001-diff-preview-light-800.png" alt="The window in Unity&#x27;s light editor theme." width="800" height="480" loading="lazy"></a><figcaption>Light editor theme.</figcaption></figure>
+</div>
+
+<h2>Compatibility</h2>
+<table>
+<thead><tr><th scope="col">Area</th><th scope="col">Status</th></tr></thead>
+<tbody>
+<tr><td>Unity versions</td><td>6000.0 or newer. Tested on <strong>6000.0.85f1 (LTS)</strong> and <strong>6000.6.6f1</strong>.
+6000.1 to 6000.5 and 6000.7 have not been tested yet.</td></tr>
+<tr><td>Editor platforms</td><td>Tested in the Linux editor (window, batchmode, tests, apply/revert). Windows and macOS editors not tested yet.</td></tr>
+<tr><td>Player builds</td><td>Not affected: editor-only, nothing is added to builds.</td></tr>
+<tr><td>Render pipelines</td><td>Not applicable (no runtime content).</td></tr>
+<tr><td>Dependencies</td><td>Lite: none. Pro: Unity's <code>com.unity.nuget.mono-cecil</code> package (installed automatically) and Lite.</td></tr>
+</tbody>
+</table>
+
+</div></main>
+<footer class="site"><div class="wrap">
+<p>© 2026 Pangaman Studios. Unity is a trademark of Unity Technologies; this site is not affiliated with or endorsed by Unity.</p>
+<ul><li><a href="privacy.html">Privacy</a></li><li><a href="how-we-build.html">How we build</a></li><li><a href="support.html">Contact</a></li><li><a href="changelog.html">News</a></li></ul>
+</div></footer>
+</body>
+</html>

@@ -1,0 +1,234 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CoreCLR Ready manual · Pangaman Studios</title>
+<meta name="description" content="User manual for CoreCLR Ready Lite and Pro.">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self'; style-src 'self'; script-src 'none'; object-src 'none'; base-uri 'self'; form-action 'none'">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="site"><div class="wrap">
+<a class="brand" href="index.html"><img src="assets/img/mark.svg" alt="" width="36" height="36">Pangaman Studios</a>
+<nav class="main" aria-label="Main"><ul><li><a href="index.html">Home</a></li><li><a href="coreclr-ready.html">CoreCLR Ready</a></li><li><a href="docs.html" aria-current="page">Documentation</a></li><li><a href="changelog.html">Changelog</a></li><li><a href="support.html">Support</a></li></ul></nav>
+</div></header>
+<main id="main"><div class="wrap">
+<div class="doc">
+<nav class="toc" aria-label="Manual contents"><strong>Contents</strong><div class="toc">
+<ul>
+<li><a href="#1-requirements">1. Requirements</a></li>
+<li><a href="#2-installing">2. Installing</a></li>
+<li><a href="#3-the-window">3. The window</a></li>
+<li><a href="#4-rules">4. Rules</a><ul>
+<li><a href="#ccr001-details">CCR001 details</a></li>
+</ul>
+</li>
+<li><a href="#5-command-line-and-ci">5. Command line and CI</a></li>
+<li><a href="#6-applying-fixes-pro">6. Applying fixes (Pro)</a></li>
+<li><a href="#7-precompiled-dll-scan-pro">7. Precompiled DLL scan (Pro)</a></li>
+<li><a href="#8-known-limitations">8. Known limitations</a></li>
+<li><a href="#9-support">9. Support</a></li>
+</ul>
+</div>
+<p><a href="assets/coreclr-ready-manual.pdf">Download as PDF</a></p></nav>
+<article class="prose"><h1 id="coreclr-ready-user-manual">CoreCLR Ready: user manual</h1>
+<p>Version 0.1.0 · Pangaman Studios · Lite and Pro</p>
+<p>CoreCLR Ready finds C# code in a Unity project that breaks when Domain Reload is turned off (Enter Play Mode
+Options) and when the project moves to Unity's CoreCLR scripting runtime. It reports each problem with an
+explanation and, where a safe mechanical change exists, shows the exact edit as a diff.</p>
+<ul>
+<li><strong>Lite</strong> scans, reports, exports and previews fixes. It never changes your files.</li>
+<li><strong>Pro</strong> adds applying fixes (one or all) with an automatic backup and one-click revert, a command-line apply/revert
+  for CI, and a scan of precompiled managed DLLs.</li>
+</ul>
+<h2 id="1-requirements">1. Requirements</h2>
+<ul>
+<li>Unity 6000.0 or newer. Tested on 6000.0.85f1 (LTS) and 6000.6.6f1. Versions 6000.1 to 6000.5 and 6000.7 have not been tested yet.</li>
+<li>Editor only. Nothing is added to player builds.</li>
+<li>Pro additionally needs the package <code>com.unity.nuget.mono-cecil</code> (Unity's own; installed automatically as a dependency).</li>
+</ul>
+<h2 id="2-installing">2. Installing</h2>
+<p>Import the package from the Package Manager (My Assets). It installs as an embedded package under
+<code>Packages/com.pangamanstudios.coreclr-ready</code> (Pro: <code>Packages/com.pangamanstudios.coreclr-ready.pro</code>).
+Pro requires Lite to be installed.</p>
+<p>To remove it, delete those folders. Pro backups live in <code>Library/CoreClrReady/Backups</code> and can be deleted at any time.</p>
+<h2 id="3-the-window">3. The window</h2>
+<p>Open <strong>Window &gt; Analysis &gt; CoreCLR Ready</strong> and press <strong>Scan</strong>.</p>
+<ul>
+<li>The toolbar filters by severity (Errors / Warnings / Info), shows only findings with an automatic fix (<strong>Fixable</strong>),
+  includes static state in editor-only code (<strong>Editor statics</strong>, off by default) and searches by file, member, rule or text.</li>
+<li><strong>Export JSON</strong> / <strong>Export MD</strong> save the current report.</li>
+<li>The left pane lists findings grouped by file. <code>[fix]</code> marks findings with an automatic fix.</li>
+<li>The right pane shows the rule, the explanation, the recommendation, <strong>Open in IDE</strong>, a link to Unity's documentation,
+  and either the reason a manual change is needed or the <strong>fix preview</strong> (a unified diff of the change).</li>
+<li>Pro adds <strong>Apply this fix</strong> under the preview and <strong>Apply all fixes</strong> / <strong>Revert last</strong> in the toolbar.</li>
+</ul>
+<p>What is scanned: C# files under <code>Assets/</code> and in embedded or local packages, compiled with the same defines and
+references Unity uses for each assembly. Packages from the registry or Git (read-only) are scanned but never fixed.
+CoreCLR Ready skips its own assemblies.</p>
+<h2 id="4-rules">4. Rules</h2>
+<table>
+<thead>
+<tr>
+<th>Id</th>
+<th>Finds</th>
+<th>Severity</th>
+<th>Automatic fix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CCR001</td>
+<td>Mutable static state (fields, events, auto-properties, singletons) that survives Play mode with Domain Reload off</td>
+<td>Warning</td>
+<td>Yes, for safe cases: a generated <code>[RuntimeInitializeOnLoadMethod(SubsystemRegistration)]</code> reset method</td>
+</tr>
+<tr>
+<td>CCR002</td>
+<td><code>AppDomain.CurrentDomain.GetAssemblies()</code> (Unity code UAC0005)</td>
+<td>Warning</td>
+<td>Yes on Unity 6000.4+ when the result is only enumerated</td>
+</tr>
+<tr>
+<td>CCR003</td>
+<td><code>AppDomain.CurrentDomain.DomainUnload +=</code> (UAC0006)</td>
+<td>Warning</td>
+<td>No: move the handler to <code>[OnAssemblyUnloading]</code> / <code>[OnCodeUnloading]</code> (6.5+)</td>
+</tr>
+<tr>
+<td>CCR004</td>
+<td><code>BinaryFormatter</code> (UAC0023)</td>
+<td>Error</td>
+<td>No: needs a save-data migration</td>
+</tr>
+<tr>
+<td>CCR005</td>
+<td><code>Assembly.Location</code> (UAC0007)</td>
+<td>Warning</td>
+<td>Yes on 6000.4+: <code>AssemblyExtension.GetLoadedAssemblyPath(a) ?? string.Empty</code></td>
+</tr>
+<tr>
+<td>CCR006</td>
+<td><code>IntPtr.ToInt32()</code> / <code>(int)intPtr</code></td>
+<td>Warning</td>
+<td>No</td>
+</tr>
+<tr>
+<td>CCR007</td>
+<td><code>string.GetHashCode()</code> used as a stable value</td>
+<td>Warning</td>
+<td>No</td>
+</tr>
+<tr>
+<td>CCR008</td>
+<td><code>Encoding.GetEncoding(...)</code> for non-default encodings</td>
+<td>Warning</td>
+<td>No</td>
+</tr>
+<tr>
+<td>CCR009</td>
+<td><code>Assembly.LoadFile</code> / <code>LoadFrom</code> / <code>Load(byte[])</code> (UAC0020)</td>
+<td>Warning</td>
+<td>No: <code>CurrentAssemblies.LoadFromPath</code> / <code>LoadFromBytes</code> (6.5+)</td>
+</tr>
+<tr>
+<td>CCR010</td>
+<td><code>UnityEditor.Scripting.ManagedDebugger</code></td>
+<td>Warning</td>
+<td>No</td>
+</tr>
+<tr>
+<td>CCR011</td>
+<td><code>[DllImport]</code> into Mono runtime libraries</td>
+<td>Error</td>
+<td>No</td>
+</tr>
+</tbody>
+</table>
+<h3 id="ccr001-details">CCR001 details</h3>
+<p>A fix is offered only when re-running the initializer cannot change behaviour: no initializer, literals and
+constants, <code>default</code>, <code>typeof</code>, empty or constant-filled BCL collections and arrays, and <code>Clear()</code> for
+empty <code>static readonly</code> BCL collections. Everything else is reported with the reason, for example: the initializer
+calls a method, the member is assigned in a static constructor, it lives in a generic type, it is <code>[ThreadStatic]</code>,
+it looks like an ID counter, or it sits in a different <code>#if</code> region.</p>
+<p>Not reported: <code>const</code>, readonly members that hold immutable values (primitives, strings, <code>System.Type</code>, delegates,
+enums, empty arrays, instances of your own types that have no instance fields), members already reset in a
+<code>[RuntimeInitializeOnLoadMethod]</code>, <code>[InitializeOnEnterPlayMode]</code>, <code>[OnEnteringPlayMode]</code> or <code>[OnExitingPlayMode]</code>
+method, members or types marked <code>[AutoStaticsCleanup]</code> / <code>[NoAutoStaticsCleanup]</code>, and code in editor-only folders
+(unless <strong>Editor statics</strong> is on).</p>
+<p>To silence one member, put <code>// CoreClrReady:ignore</code> on the line above it.</p>
+<h2 id="5-command-line-and-ci">5. Command line and CI</h2>
+<pre><code>Unity -batchmode -nographics -quit -projectPath &lt;project&gt; \
+  -executeMethod PangamanStudios.CoreClrReady.BatchMode.Run \
+  -ccrOut report.json -ccrFormat json -ccrFailOn error
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Argument</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>-ccrOut &lt;path&gt;</code></td>
+<td>Report file (default <code>CoreClrReady-report.json</code> or <code>.md</code>)</td>
+</tr>
+<tr>
+<td><code>-ccrFormat json\|md</code></td>
+<td>Report format (default json)</td>
+</tr>
+<tr>
+<td><code>-ccrFailOn error\|warning\|info\|none</code></td>
+<td>Lowest severity that makes the exit code 1 (default error)</td>
+</tr>
+<tr>
+<td><code>-ccrIncludeEditorStatics</code></td>
+<td>Also report static state in editor-only code</td>
+</tr>
+</tbody>
+</table>
+<p>Exit codes: 0 no findings at or above the threshold, 1 findings at or above it, 2 tool error.</p>
+<p><strong>Pro:</strong> use <code>-executeMethod PangamanStudios.CoreClrReady.Pro.ProBatchMode.Run</code>, which accepts the same arguments plus
+<code>-ccrApply</code> (apply every automatic fix with a backup; the report describes the project before the fixes) and
+<code>-ccrRevert</code> (restore the files changed by the last apply, then exit).</p>
+<h2 id="6-applying-fixes-pro">6. Applying fixes (Pro)</h2>
+<ol>
+<li>Commit your work to version control first if you can.</li>
+<li>Select a finding, read the preview, press <strong>Apply this fix</strong> (or <strong>Apply all fixes</strong>) and confirm.</li>
+<li>CoreCLR Ready checks that each file still matches what was scanned. If anything changed, nothing is written and
+   you are asked to scan again.</li>
+<li>Changed files are backed up to <code>Library/CoreClrReady/Backups/&lt;timestamp&gt;/</code> with a SHA-256 manifest. Line endings and
+   a UTF-8 byte-order mark are kept.</li>
+<li><strong>Revert last</strong> restores the exact bytes of the last batch. It refuses if you edited one of those files after the fix,
+   so your edits are never overwritten. The 20 most recent batches are kept.</li>
+</ol>
+<p>Files that are not valid UTF-8 are reported but never changed.</p>
+<h2 id="7-precompiled-dll-scan-pro">7. Precompiled DLL scan (Pro)</h2>
+<p>Managed DLLs under <code>Assets/</code> and in embedded/local packages are inspected with Mono.Cecil for <code>GetAssemblies</code>,
+<code>DomainUnload</code>, <code>Assembly.Location</code>, <code>IntPtr</code> to <code>int</code> conversions, <code>Assembly.LoadFile/LoadFrom</code>, <code>BinaryFormatter</code>,
+<code>ManagedDebugger</code> and P/Invoke into Mono libraries. These findings are detect-only; contact the DLL's vendor.</p>
+<h2 id="8-known-limitations">8. Known limitations</h2>
+<ul>
+<li>The analysis is static. It cannot know whether a static value is meant to persist; use the ignore comment or
+  <code>[NoAutoStaticsCleanup]</code> for intended caches.</li>
+<li>Large projects: the first scan in an editor session is slower because the analyzer is compiled just-in-time
+  (about 40 s for 160 files with all references in our test; later scans are faster).</li>
+<li>The bundled Roslyn (4.8) parses C# up to version 12. Unity compiles C# 9, so this only matters for unusual setups.</li>
+<li>Unity's guidance on CoreCLR is still changing. Rules follow Unity's documentation as of October 2026.</li>
+</ul>
+<h2 id="9-support">9. Support</h2>
+<p>Contact: see the publisher page on the Unity Asset Store. Please include the exported Markdown report and your Unity
+version.</p></article>
+</div>
+</div></main>
+<footer class="site"><div class="wrap">
+<p>© 2026 Pangaman Studios. Unity is a trademark of Unity Technologies; this site is not affiliated with or endorsed by Unity.</p>
+<ul><li><a href="privacy.html">Privacy</a></li><li><a href="how-we-build.html">How we build</a></li><li><a href="support.html">Contact</a></li><li><a href="changelog.html">News</a></li></ul>
+</div></footer>
+</body>
+</html>
