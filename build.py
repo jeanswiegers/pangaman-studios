@@ -131,7 +131,7 @@ makes entering Play mode faster (from Unity 6.8 it is the only option). Both cha
 keep their values between Play sessions, <code>AppDomain</code> APIs stop behaving the same, <code>BinaryFormatter</code>
 goes away. CoreCLR Ready scans your project's C# for these patterns, explains each one, links to Unity's
 documentation and, where a safe mechanical change exists, shows the exact edit as a diff.</p>
-<div class="btns"><a class="btn" href="ASSET_STORE_LITE_URL">Get Lite (free)</a><a class="btn" href="ASSET_STORE_PRO_URL">Get Pro</a><a class="btn ghost" href="docs.html">Read the manual</a></div>
+<div class="btns"><a class="btn" href="https://assetstore.unity.com/">Get Lite (free)</a><a class="btn" href="https://assetstore.unity.com/">Get Pro</a><a class="btn ghost" href="docs.html">Read the manual</a></div>
 </div>
 <div><figure><a href="assets/img/01-findings-list-dark.png"><img src="assets/img/crop-list.png" alt="Findings list grouped by file after a scan of a demo project, with warning and error icons and [fix] tags." width="760" height="560"></a><figcaption>Findings grouped by file after a scan. <code>[fix]</code> marks findings with an automatic fix.</figcaption></figure></div>
 </section>
@@ -147,7 +147,7 @@ documentation and, where a safe mechanical change exists, shows the exact edit a
 <li>JSON and Markdown reports; batchmode command with a CI exit code.</li>
 <li>Read-only: Lite never changes your files.</li>
 </ul>
-<a class="btn" href="ASSET_STORE_LITE_URL">Asset Store: Lite</a>
+<a class="btn" href="https://assetstore.unity.com/">Asset Store: Lite</a>
 </div>
 <div class="card pro">
 <h3>Pro</h3>
@@ -158,7 +158,7 @@ documentation and, where a safe mechanical change exists, shows the exact edit a
 <li>Command-line apply and revert for CI.</li>
 <li>Scan of precompiled managed DLLs (detect-only).</li>
 </ul>
-<a class="btn" href="ASSET_STORE_PRO_URL">Asset Store: Pro</a>
+<a class="btn" href="https://assetstore.unity.com/">Asset Store: Pro</a>
 </div>
 </div>
 
@@ -227,7 +227,7 @@ def support():
 <p class="lead">Questions, bug reports and feature requests are welcome. A person reads every message.</p>
 <h2>Contact</h2>
 <p>Email <a href="mailto:jeanswiegers@gmail.com">jeanswiegers@gmail.com</a>. We usually reply within two business days.</p>
-<p>You can also reach us through our <a href="ASSET_STORE_PUBLISHER_URL">publisher page on the Unity Asset Store</a>.</p>
+<p>You can also reach us through our <a href="https://assetstore.unity.com/">publisher page on the Unity Asset Store</a>.</p>
 <h2>What to include</h2>
 <ul>
 <li>The product and edition (Lite or Pro) and its version (Package Manager shows it).</li>
