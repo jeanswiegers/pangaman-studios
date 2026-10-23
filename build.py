@@ -12,7 +12,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 PKG_DOCS = os.path.join(HERE, "..", "coreclr-ready", "docs", "package")
 UPDATED = "19 October 2026"
 
-PH = ["ASSET_STORE_LITE_URL", "ASSET_STORE_PRO_URL", "ASSET_STORE_PUBLISHER_URL", "SUPPORT_EMAIL", "SUPPORT_REPLY_TIME", "SITE_URL"]
+PH = ["ASSET_STORE_LITE_URL", "ASSET_STORE_PRO_URL", "ASSET_STORE_PUBLISHER_URL", "SITE_URL"]
 
 
 def ph(name):
@@ -226,7 +226,7 @@ def support():
     body = f"""<h1>Support</h1>
 <p class="lead">Questions, bug reports and feature requests are welcome. A person reads every message.</p>
 <h2>Contact</h2>
-<p>Email <a href="mailto:SUPPORT_EMAIL">SUPPORT_EMAIL</a>. We usually reply within SUPPORT_REPLY_TIME.</p>
+<p>Email <a href="mailto:jeanswiegers@gmail.com">jeanswiegers@gmail.com</a>. We usually reply within two business days.</p>
 <p>You can also reach us through our <a href="ASSET_STORE_PUBLISHER_URL">publisher page on the Unity Asset Store</a>.</p>
 <h2>What to include</h2>
 <ul>
@@ -274,7 +274,7 @@ information Unity shares with publishers under its terms, and use it only for li
 <h2>When you contact us</h2>
 <p>If you email us, we use your address and message only to reply and to fix the problem you report. We don't add
 you to mailing lists and don't share your messages. Ask us at any time to delete them:
-<a href="mailto:SUPPORT_EMAIL">SUPPORT_EMAIL</a>.</p>
+<a href="mailto:jeanswiegers@gmail.com">jeanswiegers@gmail.com</a>.</p>
 <h2>Changes</h2>
 <p>If this policy changes, the new version will be posted here with a new date.</p>
 """
